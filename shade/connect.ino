@@ -42,6 +42,7 @@ void arduinoOtaConnect(){
   
   ArduinoOTA.onStart([]() {
     Serial.println("Start updating...");
+    storagePrepareForOTA();
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\nEnd");
@@ -50,6 +51,7 @@ void arduinoOtaConnect(){
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
+    storageErrorDuringOTA();
     Serial.printf("Error[%u]: ", error);
     if (error == OTA_AUTH_ERROR) {
       Serial.println("Auth Failed");

@@ -10,6 +10,11 @@
 WiFiClient espClient;
 PubSubClient client(espClient);
 
+int current_position = 0;
+int max_steps = DEFAULT_MAX_STEPS;
+int left_offset = 0;
+int right_offset = 0;
+
 void setup() {
   Serial.begin(9600);
 
@@ -20,15 +25,33 @@ void setup() {
   Serial.println();
   Serial.println("----------------------------------------------");
 
+  storageSetup();
+
+  current_position = storageReadPosition();
+  max_steps = storageReadMaxSteps();    
+
+  Serial.print("Position: ");
+  Serial.println(current_position);
+  Serial.print("Max Steps: ");
+  Serial.println(max_steps);
+  Serial.println("----------------------------------------------");
+  
   client.setBufferSize(MQTT_PACKET_SIZE);
   
   connect();
 
-  sendDiscovery();
+  delay(1000);
+  sendCoverDiscovery(max_steps);
+  delay(1000);
+  sendMaxStepsDiscovery();
+  delay(1000);
 
   client.publish(AVAILABILITY_TOPIC, "online", true);
 
+  publishInt(MAX_STEPS_STATE_TOPIC, max_steps, false);
+
   client.subscribe(COVER_COMMAND_TOPIC);
+  client.subscribe(MAX_STEPS_COMMAND_TOPIC);
 
   client.setCallback(callback);
 }
@@ -62,5 +85,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
         client.publish(COVER_STATE_TOPIC, "closed");
         Serial.print("Done CLOSING");
     }
+  } else if (String(topic) == MAX_STEPS_COMMAND_TOPIC) {
+    payload[length] = '\0';
+    String s = String((char*)payload);
+    int i= s.toInt();
+    Serial.print("Updating max steps to ");
+    Serial.println(i);
+    storageSaveMaxSteps(i);
+    ESP.restart();
   }
 }

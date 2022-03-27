@@ -1,4 +1,4 @@
-void publishJson(const char* topic, const JsonDocument& doc) {
+void publishJson(const char* topic, const JsonDocument& doc, bool retain) {
   Serial.print("Sending json document to ");
   Serial.println(topic);
   
@@ -16,7 +16,18 @@ void publishJson(const char* topic, const JsonDocument& doc) {
     Serial.println(" which is WRONG.");  
   }
 
-  if (client.publish(topic, buffer, false)) {
+  if (client.publish(topic, buffer, retain)) {
+    Serial.println("Message send OK.");
+  } else {
+    Serial.println("Message send FAILED.");
+  }
+}
+
+void publishInt(const char* topic, int value, bool retain) {
+  char cstr[16];
+  itoa(value, cstr, 10);
+  
+  if (client.publish(topic, cstr, retain)) {
     Serial.println("Message send OK.");
   } else {
     Serial.println("Message send FAILED.");

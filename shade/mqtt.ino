@@ -16,7 +16,7 @@ void publishJson(const char* topic, const JsonDocument& doc) {
     Serial.println(" which is WRONG.");  
   }
 
-  if (client.publish(topic, buffer, n)) {
+  if (client.publish(topic, buffer, false)) {
     Serial.println("Message send OK.");
   } else {
     Serial.println("Message send FAILED.");

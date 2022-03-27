@@ -7,11 +7,26 @@
 #include "secrets.h"
 #include "device.h"
 
-PubSubClient client;
+WiFiClient espClient;
+PubSubClient client(espClient);
 
 void setup() {
   Serial.begin(9600);
+
+  delay(1000);
+  Serial.println("----------------------------------------------");
+  Serial.println();
+  Serial.println("Motorized Cellular Shade v" SOFTWARE_VERSION);
+  Serial.println();
+  Serial.println("----------------------------------------------");
+
+  client.setBufferSize(MQTT_PACKET_SIZE);
+  
   connect();
+
+  sendDiscovery();
+
+  client.publish(AVAILABILITY_TOPIC, "online", true);
 
   client.subscribe(COVER_COMMAND_TOPIC);
 

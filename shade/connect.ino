@@ -7,38 +7,38 @@ void connect() {
 void wifiConnect(){
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-  Serial.println("Connecting to Wi-Fi");
+  Serial.print("Connecting to Wi-Fi...");
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
+  Serial.println(" ok");
 
   WiFi.setAutoReconnect(true);
   WiFi.persistent(false);
 
-  Serial.println("Connected to Wi-Fi");
+  Serial.println("Successfully connected to " WIFI_SSID);
 }
 
 void mqttConnect() {
   client.setServer(MQTT_SERVER, MQTT_PORT);
-  Serial.println("Connecting to MQTT");
+  Serial.print("Connecting to MQTT...");
 
   while (!client.connected()) {
-    Serial.print(".");
     if (client.connect(DEVICE_ID, MQTT_USER, MQTT_PASS, AVAILABILITY_TOPIC, 2, true, "offline")) {
-      Serial.println("Connected to MQTT");
-      client.publish(AVAILABILITY_TOPIC, "online", true);
+      Serial.println(" ok");
     } else {
-      Serial.println("Could not connect! ");
-      Serial.print(client.state());
       delay(2000);
+      Serial.print(".");
     }
   }
+
+  Serial.println("Successfully connected to " MQTT_SERVER);
 }
 
 void arduinoOtaConnect(){
-  ArduinoOTA.setHostname(DEVICE_ID);
+  ArduinoOTA.setHostname(DEVICE_ID " v" SOFTWARE_VERSION);
   
   ArduinoOTA.onStart([]() {
     Serial.println("Start updating...");

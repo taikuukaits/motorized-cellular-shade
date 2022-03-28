@@ -8,7 +8,7 @@ try {
     return;
 }
 
-var hello_topic = "motorized-cellular-shades/calibrate/hello";
+var greeting_topic = "motorized-cellular-shades/greetings";
 
 
 const client = mqtt.connect(secrets.broker, {
@@ -22,28 +22,56 @@ const client = mqtt.connect(secrets.broker, {
 
 client.on('connect', function () {
     console.log("Connected to broker, sending HELLO.")
-    client.subscribe(hello_topic, function (err) {
-        if (err) throw err;
-
-        client.publish(hello_topic, 'hello')
-
-        console.log("Waiting 1 second for responses.")
-        setTimeout(pick_shade, 1000)
-    });
+    how_to_find_shades();
 });
+
+function how_to_find_shades() {
+    inquirer
+        .prompt([
+            {
+            type: 'list',
+            name: 'message',
+            message: 'How would you like to find the shade?',
+            choices: ['hello', 'announce'],
+            },
+        ])
+        .then(answers => {
+            console.info('Answer:', answers.message);
+            var msg = answers.message == 'hello' ? '__hello__' : '__announce__';
+            find_shades(msg);
+        });
+}
 
 var shades = [];
 client.on('message', function (topic, messageBuffer) {
-    if (topic == hello_topic) {
+    if (topic == greeting_topic) {
         var message = messageBuffer.toString();
-        if (message != "hello") {
+        if (message != "__hello__" && message != "__announce__") {
             console.log("Found shade: " + message);
             shades.push(message);
         }
     }
 })
 
+function find_shades(msg) {
+    client.subscribe(greeting_topic, function (err) {
+        if (err) throw err;
 
+        client.publish(greeting_topic, msg)
+
+        console.log("Waiting 1 second for responses.")
+        setTimeout(check_for_shades, 1000)
+    });
+}
+
+function check_for_shades() {
+    if (shades.length == 0) {
+        console.log("No shades found.");
+        how_to_find_shades();
+    } else {
+        pick_shade();
+    }
+}
 
 function pick_shade() {
     inquirer

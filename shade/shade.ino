@@ -65,7 +65,7 @@ void setup() {
   client.subscribe(COVER_COMMAND_TOPIC);
 
   //Calibration
-  client.subscribe(CALIBRATE_HELLO_TOPIC);
+  client.subscribe(GREETINGS_TOPIC);
   client.subscribe(CALIBRATE_MAX_STEPS_TOPIC);
 
   client.setCallback(callback);
@@ -123,11 +123,15 @@ void callback(char* topic_raw, byte* payload, unsigned int length) {
         client.publish(COVER_STATE_TOPIC, "closing");
         move_both_motors_by(max_steps - current_position);
     }
-  } else if (topic == CALIBRATE_HELLO_TOPIC) {
-    if (!strncmp((char *)payload, "hello", length)) {
+  } else if (topic == GREETINGS_TOPIC) {
+    if (!strncmp((char *)payload, HELLO_PAYLOAD, length)) {
       if (max_steps == 0) {
-        client.publish(CALIBRATE_HELLO_TOPIC, DEVICE_ID);  
+        Serial.println("Sent hello!");
+        client.publish(GREETINGS_TOPIC, DEVICE_ID);  
       }
+    } else if (!strncmp((char *)payload, ANNOUNCE_PAYLOAD, length)) { 
+      Serial.println("Sent hello!");
+      client.publish(GREETINGS_TOPIC, DEVICE_ID);
     }
   } else if (topic == CALIBRATE_LEFT_JOG_TOPIC) {
     int steps = payload_to_int(payload, length);

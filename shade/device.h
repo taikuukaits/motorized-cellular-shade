@@ -29,3 +29,6 @@
 #define JSON_DOCUMENT_SIZE 1024
 #define MQTT_PACKET_SIZE 512
 #define DISCOVERY_RETAIN false
+
+#define HELLO_PAYLOAD "__hello__"
+#define ANNOUNCE_PAYLOAD "__announce__"

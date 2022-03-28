@@ -41,10 +41,12 @@ void arduinoOtaConnect(){
   ArduinoOTA.setHostname(DEVICE_ID " v" SOFTWARE_VERSION);
   
   ArduinoOTA.onStart([]() {
+    current_mode = IS_UPDATING;
     Serial.println("Start updating...");
     storagePrepareForOTA();
   });
   ArduinoOTA.onEnd([]() {
+    current_mode = IS_IDLING;
     Serial.println("\nEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
@@ -64,6 +66,7 @@ void arduinoOtaConnect(){
     } else if (error == OTA_END_ERROR) {
       Serial.println("End Failed");
     }
+    ESP.restart();
   });
   ArduinoOTA.begin();
 }

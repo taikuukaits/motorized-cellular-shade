@@ -2,13 +2,11 @@
 
 EEPROM_Rotate EEPROMr;
 
-#define POSITION_INDEX 0
-#define MAX_STEPS_INDEX 4
-#define LEFT_OFFSET_INDEX 8
-#define RIGHT_OFFSET_INDEX 12
+#define POSITION_INDEX 10
+#define MAX_STEPS_INDEX 20
 
-#define EEPROM_SECTORS 1
-#define EEPROM_SPACE 16
+#define EEPROM_SECTORS 4
+#define EEPROM_SPACE 4096
 
 void storageSetup() {
     EEPROMr.size(EEPROM_SECTORS);
@@ -29,22 +27,6 @@ void storageSaveMaxSteps(int pos) {
 
 int storageReadMaxSteps() {
   eepromReadInt(MAX_STEPS_INDEX);
-}
-
-void storageSaveLeftOffset(int pos) {
-  eepromWriteInt(LEFT_OFFSET_INDEX, pos); 
-}
-
-int storageReadLeftOffset() {
-  eepromReadInt(LEFT_OFFSET_INDEX);
-}
-
-void storageSaveRightOffset(int pos) {
-  eepromWriteInt(RIGHT_OFFSET_INDEX, pos); 
-}
-
-int storageReadRightOffset() {
-  eepromReadInt(RIGHT_OFFSET_INDEX);
 }
 
 void eepromWriteInt(int pos, int val) {

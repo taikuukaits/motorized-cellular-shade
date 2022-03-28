@@ -68,7 +68,7 @@ function pick_calibration_option(shade){
         type: 'list',
         name: 'calibration',
         message: 'What would you like to do with ' + shade + '?',
-        choices: ['Set Max Steps', 'Jog', 'Jog Left', 'Jog Right'],
+        choices: ['Set Max Steps', 'Set Position', 'Jog', 'Jog Left', 'Jog Right'],
         },
     ])
     .then(answers => {
@@ -92,6 +92,23 @@ function set_max_steps(shade) {
     .then(answers => {
         console.info('Answer:', answers.max_steps);
         client.publish(shade + "/calibrate/max-steps", answers.max_steps);
+        pick_calibration_option(shade);
+    });
+
+}
+
+function set_position(shade) {
+    inquirer
+    .prompt([
+        {
+        type: 'integer',
+        name: 'position',
+        message: 'What is the position you would like to set?'
+        },
+    ])
+    .then(answers => {
+        console.info('Answer:', answers.position);
+        client.publish(shade + "/calibrate/position", answers.position);
         pick_calibration_option(shade);
     });
 

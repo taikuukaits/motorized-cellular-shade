@@ -116,12 +116,12 @@ void callback(char* topic_raw, byte* payload, unsigned int length) {
         Serial.print("OPENING");
         current_mode = IS_OPENING;
         client.publish(COVER_STATE_TOPIC, "opening");
-        jog_both(0 - current_position);
+        move_both_motors_by(0 - current_position);
     } else if (!strncmp((char *)payload, "CLOSE", length)) {
         Serial.print("CLOSING");
         current_mode = IS_CLOSING;
         client.publish(COVER_STATE_TOPIC, "closing");
-        jog_both(max_steps - current_position);
+        move_both_motors_by(max_steps - current_position);
     }
   } else if (topic == CALIBRATE_HELLO_TOPIC) {
     if (!strncmp((char *)payload, "hello", length)) {
@@ -131,31 +131,39 @@ void callback(char* topic_raw, byte* payload, unsigned int length) {
     }
   } else if (topic == CALIBRATE_LEFT_JOG_TOPIC) {
     int steps = payload_to_int(payload, length);
-    jog_motor(left_motor, "left", steps);
+    move_motor_by(left_motor, "left", steps);
     current_mode = IS_JOGGING;
     
   } else if (topic == CALIBRATE_RIGHT_JOG_TOPIC) {
     int steps = payload_to_int(payload, length);
-    jog_motor(right_motor, "right", steps);
+    move_motor_by(right_motor, "right", steps);
     current_mode = IS_JOGGING;
     
   }  else if (topic == CALIBRATE_JOG_TOPIC) {
     int steps = payload_to_int(payload, length);
-    jog_both(steps);
+    move_both_motors_by(steps);
     current_mode = IS_JOGGING;
 
-  }else if (topic == CALIBRATE_MAX_STEPS_TOPIC) {
+  } else if (topic == CALIBRATE_MAX_STEPS_TOPIC) {
     int steps = payload_to_int(payload, length); 
     Serial.print("Updating max steps to ");
     Serial.println(steps);
     storageSaveMaxSteps(steps);
+    Serial.println("Restarting...");
+    ESP.restart();
+  } else if (topic == CALIBRATE_POSITION_TOPIC) {
+    int steps = payload_to_int(payload, length); 
+    Serial.print("Updating position to ");
+    Serial.println(steps);
+    storageSavePosition(steps);
+    Serial.println("Restarting...");
     ESP.restart();
   }
 }
 
-void jog_both(int steps){
-    jog_motor(left_motor, "left", steps);
-    jog_motor(right_motor, "right", steps);
+void move_both_motors_by(int steps){
+    move_motor_by(left_motor, "left", steps);
+    move_motor_by(right_motor, "right", steps);
 }
 
 int payload_to_int(byte* payload, unsigned int length) {
@@ -164,7 +172,7 @@ int payload_to_int(byte* payload, unsigned int length) {
   return s.toInt();
 }
 
-void jog_motor(MotorDriver* motor, char* motor_name, int steps) {
+void move_motor_by(MotorDriver* motor, char* motor_name, int steps) {
     Serial.print("Jogging ");
     Serial.print(motor_name);
     Serial.print(" motor by ");

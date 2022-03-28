@@ -103,6 +103,8 @@ function pick_calibration_option(shade){
         console.info('Answer:', answers.calibration);
         if (answers.calibration == 'Set Max Steps') {
             set_max_steps(shade);
+        } else if (answers.calibration == 'Set Position') {
+            set_position(shade);
         }
     });
 }

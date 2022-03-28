@@ -67,6 +67,7 @@ void setup() {
   //Calibration
   client.subscribe(GREETINGS_TOPIC);
   client.subscribe(CALIBRATE_MAX_STEPS_TOPIC);
+  client.subscribe(CALIBRATE_POSITION_TOPIC);
 
   client.setCallback(callback);
 }

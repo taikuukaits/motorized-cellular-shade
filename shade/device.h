@@ -19,9 +19,9 @@
 #define COVER_POSITION_STATE_TOPIC DEVICE_ID "/shade/position/state"
 #define COVER_POSITION_COMMAND_TOPIC DEVICE_ID "/shade/position/command"
 
-#define CALIBRATE_HELLO_TOPIC "motorized-cellular-shades/calibrate/hello"
+#define GREETINGS_TOPIC "motorized-cellular-shades/greetings"
 #define CALIBRATE_MAX_STEPS_TOPIC DEVICE_ID "/calibrate/max-steps"
-#define CALIBRATE_POSITION_TOPIC "/calibrate/position"
+#define CALIBRATE_POSITION_TOPIC DEVICE_ID "/calibrate/position"
 #define CALIBRATE_LEFT_JOG_TOPIC DEVICE_ID "/calibrate/left-jog"
 #define CALIBRATE_RIGHT_JOG_TOPIC DEVICE_ID "/calibrate/right-jog"
 #define CALIBRATE_JOG_TOPIC DEVICE_ID "/calibrate/jog"

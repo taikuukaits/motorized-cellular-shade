@@ -4,13 +4,14 @@ const inquirer = require('inquirer');
 try {
     var secrets = require("./secrets.json");
 } catch (e){
-    console.error("You must define a secrets.json file with the broker, username and password!");
-    return;
+    msg = "You must define a secrets.json file with the broker, username and password!";
+    console.error(msg);
+    throw Error(msg, e);
 }
 
 var greeting_topic = "motorized-cellular-shades/greetings";
 
-
+console.log("Connecting to MQTT broker at: " + secrets.broker);
 const client = mqtt.connect(secrets.broker, {
     clientId: "shade-boss",
     clean: true,
@@ -19,6 +20,11 @@ const client = mqtt.connect(secrets.broker, {
     password: secrets.password,
     reconnectPeriod: 1000,
   });
+
+client.on('error', function(e){
+    console.log("ERROR: ", e)
+    client.end()
+})
 
 client.on('connect', function () {
     console.log("Connected to broker, sending HELLO.")
@@ -105,6 +111,12 @@ function pick_calibration_option(shade){
             set_max_steps(shade);
         } else if (answers.calibration == 'Set Position') {
             set_position(shade);
+        } else if (answers.calibration == "Jog") {
+            jog_by(shade, "jog");
+        } else if (answers.calibration == "Jog Left") {
+            jog_by(shade, "left-jog");
+        } else if (answers.calibration == "Jog Right") {
+            jog_by(shade, "right-jog");
         }
     });
 }
@@ -139,6 +151,23 @@ function set_position(shade) {
     .then(answers => {
         console.info('Answer:', answers.position);
         client.publish(shade + "/calibrate/position", answers.position);
+        pick_calibration_option(shade);
+    });
+
+}
+
+function jog_by(shade, topic) {
+    inquirer
+    .prompt([
+        {
+        type: 'integer',
+        name: 'amount',
+        message: 'How many steps to jog?'
+        },
+    ])
+    .then(answers => {
+        console.info('Answer:', answers.position);
+        client.publish(shade + "/calibrate/" + topic, answers.amount);
         pick_calibration_option(shade);
     });
 

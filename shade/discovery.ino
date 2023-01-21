@@ -1,7 +1,7 @@
 void addDeviceInformation(JsonDocument& doc) {
   JsonObject device = doc.createNestedObject("device");
-  device["identifiers"] = DEVICE_ID;
-  device["sw_version"] = SOFTWARE_VERSION;
+  device["ids"] = DEVICE_ID; //identifiers
+  device["sw"] = SOFTWARE_VERSION; //sw_version
   device["name"] = DEVICE_NAME;
 }
 
@@ -13,11 +13,11 @@ void sendCoverDiscovery(int position_open) {
 
   addDeviceInformation(doc);
 
-  doc["device_class"] = "shade";
+  doc["dev_cla"] = "shade"; //device_class
   doc["name"] = DEVICE_NAME " Shade";
   
   doc["stat_t"] = COVER_STATE_TOPIC;
-  doc["unique_id"] = DEVICE_ID "-shade";
+  doc["uniq_id"] = DEVICE_ID "-shade"; //unique_id
 
   doc["position_open"] = position_open;
   doc["position_topic"] = COVER_POSITION_STATE_TOPIC;

@@ -19,4 +19,5 @@ class MotorDriver
         int _pinEncoder;
         bool _tripped = false;
         bool _motor_on = false;
+        int _lastEncoding = 0;
 };

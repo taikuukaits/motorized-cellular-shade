@@ -17,12 +17,19 @@ void MotorDriver::begin() {
 
 void MotorDriver::loop() {
     if (_steps <= 0) {
+
       if (_motor_on) {
         motor_stop();
       }
       return;
     }
-    
+
+    int currMillis = millis();
+    if (currMillis - _lastEncoding > 50) {
+      _lastEncoding = currMillis;
+    }else{
+      return;
+    }
     bool encoder_on = digitalRead(_pinEncoder);
     if (encoder_on && !_tripped) {
         _tripped = true;
@@ -41,6 +48,8 @@ void MotorDriver::move_forward_steps(int steps) {
     _motor_on = true;
     digitalWrite(_pinA, HIGH);
     digitalWrite(_pinB, LOW);
+    Serial.println("Forward!");
+
 }
 
 void MotorDriver::move_backward_steps(int steps) {
@@ -48,10 +57,15 @@ void MotorDriver::move_backward_steps(int steps) {
     _motor_on = true;
     digitalWrite(_pinA, LOW);
     digitalWrite(_pinB, HIGH);
+    Serial.println("Backward!");
+
 }
 
 void MotorDriver::motor_stop() {
+    _steps = 0;
     _motor_on = false;
     digitalWrite(_pinA, LOW);
     digitalWrite(_pinB, LOW);
+    Serial.println("Stop!");
+
 }

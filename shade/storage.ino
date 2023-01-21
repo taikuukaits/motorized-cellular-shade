@@ -7,11 +7,11 @@ EEPROM_Rotate EEPROMr;
 
 //Not sure about these values, can't find a good explanation of what I want. This is what one of the examples uses and some of the uses I saw on github.
 #define EEPROM_SECTORS 4
-#define EEPROM_SPACE 256
+#define EEPROM_SPACE 4096
 
-bool storageSetup() {
+void storageSetup() {
     EEPROMr.size(EEPROM_SECTORS);
-    EEPROMr.begin(EEPROM_SPACE);   
+    EEPROMr.begin(EEPROM_SPACE);
 }
 
 void storageSavePosition(int pos) {

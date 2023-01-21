@@ -20,6 +20,7 @@ void publishJson(const char* topic, const JsonDocument& doc, bool retain) {
     Serial.println("Message send OK.");
   } else {
     Serial.println("Message send FAILED.");
+    Serial.println(client.state());
   }
 }
 

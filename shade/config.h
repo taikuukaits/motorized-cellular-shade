@@ -9,7 +9,6 @@
 #define COVER_POSITION_COMMAND_TOPIC DEVICE_ID "/shade/position/command"
 
 #define GREETINGS_TOPIC "motorized-cellular-shades/greetings"
-#define CALIBRATE_MAX_STEPS_TOPIC DEVICE_ID "/calibrate/max-position"
 #define CALIBRATE_POSITION_TOPIC DEVICE_ID "/calibrate/position"
 #define CALIBRATE_JOG_TOPIC DEVICE_ID "/calibrate/jog"
 

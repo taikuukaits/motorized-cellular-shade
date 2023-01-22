@@ -2,8 +2,8 @@
 
 EEPROM_Rotate EEPROMr;
 
-#define MAX_STEPS_INDEX 10
-#define POSITION_INDEX 14
+#define CLOSED_POSITION_INDEX 10
+#define CURRENT_POSITION_INDEX 14
 
 //Not sure about these values, can't find a good explanation of what I want. This is what one of the examples uses and some of the uses I saw on github.
 #define EEPROM_SECTORS 4
@@ -14,20 +14,22 @@ void storageSetup() {
     EEPROMr.begin(EEPROM_SPACE);
 }
 
-void storageSavePosition(int pos) {
-  eepromWriteInt(POSITION_INDEX, pos); 
+// current position is for the motor
+void storageSaveCurrentPosition(int pos) {
+  eepromWriteInt(CURRENT_POSITION_INDEX, pos); 
 }
 
-int storageReadPosition() {
-  return eepromReadInt(POSITION_INDEX);
+int storageReadCurrentPosition() {
+  return eepromReadInt(CURRENT_POSITION_INDEX);
 }
 
-void storageSaveMaxSteps(int pos) {
-  eepromWriteInt(MAX_STEPS_INDEX, pos); 
+// closed position is used by the cover system
+void storageSaveClosedPosition(int pos) {
+  eepromWriteInt(CLOSED_POSITION_INDEX, pos); 
 }
 
-int storageReadMaxSteps() {
-  return eepromReadInt(MAX_STEPS_INDEX);
+int storageReadClosedPosition() {
+  return eepromReadInt(CLOSED_POSITION_INDEX);
 }
 
 void eepromWriteInt(int index, int value)

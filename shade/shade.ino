@@ -26,13 +26,12 @@ enum SHADE_MODE {
 
 SHADE_MODE current_mode = IS_IDLING;
 
-MotorDriver* left_motor = new MotorDriver(LEFT_MOTOR_PIN_A, LEFT_MOTOR_PIN_B, LEFT_MOTOR_PIN_ENCODER);
-MotorDriver* right_motor = new MotorDriver(RIGHT_MOTOR_PIN_A, RIGHT_MOTOR_PIN_B, RIGHT_MOTOR_PIN_ENCODER);
+MotorDriver* motor_driver = new MotorDriver(MOTOR_PIN_ONE, MOTOR_PIN_TWO, ENCODER_PIN_ONE, ENCODER_PIN_TWO);
 
 void setup() {
   Serial.begin(9600);
 
-  left_motor->begin();
+  motor_driver->begin();
   right_motor->begin();
 
   delay(1000);

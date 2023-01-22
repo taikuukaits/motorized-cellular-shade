@@ -1,16 +1,18 @@
+#include <Encoder.h>
+
 class MotorDriver 
 {
     public:
-        MotorDriver(int motor_pin_one, int motor_pin_two, int encoder_pin_one, int encoder_pin_two);
+        MotorDriver(int motor_pin_one, int motor_pin_two, Encoder encoder);
 
         void setup(); // The position always starts at 0 after setup. The position is read-only. 
         void loop();
         bool request_move(int new_target);
+        bool request_stop();
         bool is_moving(); // If moving, no new moves can be requested. If not moving, requested target reached. 
 
-        // Called whenever the position has been officially changed - as in reached the target. May also be called if movement detected but not moving. 
-        // The provided position is considered at 'rest' and likely should be saved for use in 'absolute' movements, it is relative to the zero from setup.
-        void set_position_changed_callback(void (*callback)(int)); 
+        int get_current_position(); // This can probably be private
+        void get_last_known_rest_position(); //Last known REST, meaning this ONLY UPDATES when at rest. This is safe to store.
 
     private: 
         void _has_reached_target();
@@ -25,7 +27,6 @@ class MotorDriver
         void _diagnostic_position_change();
         void _diagnostic_reached_target();
 
-        Encoder encoder;
         bool _moving = false;
 
         int _target_position = 0; // only valid if moving
@@ -39,6 +40,7 @@ class MotorDriver
         int _position_change_stall_delay = 50; // how long to wait before assuming motor has stalled
 
         bool _current_position_changed = false;
+        int _last_known_rest_position = 0;
 
         int _motor_pin_one;
         int _motor_pin_two;

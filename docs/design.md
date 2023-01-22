@@ -37,6 +37,8 @@ The MCS can be thought of as in two states, MOVING or STATIONARY. When moving th
 
 The MCS has an 'absolute zero' position established during calibration. It does not have to actually be zero, what is important is that the current position and all position requests are relative to this absolute zero. If zero is actually 'absolute zero' that means that the MCS does not need to store it. It already knows what absolute zero is. The open/close subsystem or OCS also uses an assumed zero so that it does not need to track two different values - it assumes the minimum is zero and thus does not need to store it. 
 
+
+The motor driver always starts at zero on setup - this is due to the way the encoder library works. There is a feature request to allow setting it to zero but as of writing this there is no way to set the encoder position - it always starts at zero in setup. Therefore so does the motor driver. It is a responsibility of MCS to adapt the motor driver's local positions to absolute.
 ### The OCS
 
 The open/close subsystem can convert arbitrary absolute positions into states that the Home Assistant can understand.\
@@ -50,3 +52,9 @@ There are two MQTT topics used  you need to configure the blind with post instal
 `jog`
 `zero`
 `max`
+
+### Communication between the motor and the positioner
+
+Originally I wanted the motor to inform the positioner of changes using a callback - the positioner would register for events and listen for changes. This proved problematic in C plus plus because you can't do pointers to member functions. Technically these don't need to be in classes but I like how clean it makes the individual modules. 
+
+To workaround this the motor publishes a "last_known_rest_position" and the positioner simply polls that looking for changes. The motor will update this position in the same way it would have called the event delegate. 

@@ -2,10 +2,11 @@
 #include "Arduino.h"
 #include <Encoder.h>
 
-MotorDriver::MotorDriver(int motor_pin_one, int motor_pin_two, int encoder_pin_one, int encoder_pin_two){
+// Responsible for moving the motor to positions is relative to setup (is always 0 after setup).
+MotorDriver::MotorDriver(int motor_pin_one, int motor_pin_two, Encoder encoder){
   _motor_pin_one = motor_pin_one;
   _motor_pin_two = motor_pin_two;
-  _encoder = Encoder(encoder_pin_one, encoder_pin_two);
+  _encoder = encoder;
 }
 
 void MotorDriver::setup() {
@@ -35,6 +36,12 @@ void MotorDriver::request_move() {
     }
 }
 
+void MotorDriver::request_stop() {
+  if (_moving) {
+    _target = _current_position; // We consider wherever we are the current target - let actual stop happen naturally.
+  }
+}
+
 void MotorDriver::loop() {
   int _next_position = encoder.read();
   if (_next_position != _current_position) {
@@ -59,27 +66,37 @@ void MotorDriver::loop() {
           _diagnostic_position_change_detected_within_delay();
       } else {
           //the panic situation - we were not moving or are outside of the delay (which shouldn't be possible)
+          _last_known_rest_position = _current_position;
           _diagnostic_position_change_without_movement();
-          storageSaveCurrentPosition(_current_position); 
       }
   } else if (_moving) {
       // if we are trying to move but the last change was too long ago, assume something has gone wrong
       if (_has_stall_delay_been_exceeded()){
+          _last_known_rest_position = _current_position;
           _diagnostic_motor_stall_detected();
           _moving = false; //stop moving, we haven't reached the target but nothing else to be done.
           _halt();
       }
   }
 
-  // Even if the position did not change - but we are moving, and at the target, when the delay is exceeded, we are dont moving
+  // Even if the position did not change - but we are moving, and at the target, when the delay is exceeded, we are done moving
   if (_moving && _reached_target && !_is_within_reached_target_delay()) {
       _moving = false;
       _reached_target = true;
+      _last_known_rest_position = _current_position;
   }
 }
 
 bool MotorDriver::is_moving() {
     return _moving;
+}
+
+int MotorDriver::get_last_known_rest_position() {
+    return _last_known_rest_position;
+}
+
+int MotorDriver::get_current_position() {
+    return _current_position;
 }
 
 bool MotorDriver::_has_reached_target() {

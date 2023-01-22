@@ -5,17 +5,17 @@ class MotorDriver
     public:
         MotorDriver(int motor_pin_one, int motor_pin_two, Encoder encoder);
 
-        void setup(); // The position always starts at 0 after setup. The position is read-only. 
+        void begin(); // The position always starts at 0 after setup. The position is read-only. 
         void loop();
         bool request_move(int new_target);
         bool request_stop();
         bool is_moving(); // If moving, no new moves can be requested. If not moving, requested target reached. 
 
         int get_current_position(); // This can probably be private
-        void get_last_known_rest_position(); //Last known REST, meaning this ONLY UPDATES when at rest. This is safe to store.
+        int get_last_known_rest_position(); //Last known REST, meaning this ONLY UPDATES when at rest. This is safe to store.
 
     private: 
-        void _has_reached_target();
+        bool _has_reached_target();
         void _move_positive();
         void _move_negative();
         void _halt();

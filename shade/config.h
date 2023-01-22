@@ -10,6 +10,7 @@
 
 #define GREETINGS_TOPIC "motorized-cellular-shades/greetings"
 #define CALIBRATE_POSITION_TOPIC DEVICE_ID "/calibrate/position"
+#define CALIBRATE_CLOSED_POSITION_TOPIC DEVICE_ID "/calibrate/closed"
 #define CALIBRATE_JOG_TOPIC DEVICE_ID "/calibrate/jog"
 
 #define JSON_DOCUMENT_SIZE 1024

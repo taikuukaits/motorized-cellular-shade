@@ -1,11 +1,12 @@
 #include "motor_driver.h"
+#include "permanent_storage.h"
 
 class ShadePositioner
 {
     public:
         ShadePositioner(MotorDriver motor_driver, PermanentStorage storage);
 
-        void setup();
+        void begin();
         void loop();
 
         void is_open();
@@ -13,7 +14,9 @@ class ShadePositioner
         bool is_stopped();
 
         int get_shade_position();
-        int move_to_shade_position(int target); 
+        void move_to_shade_position(int target); 
+        void move_to_close_position();
+        void request_stop();
 
         void calibration_shade_is_currently_at(int shade_position);
         void calibration_set_shade_closed_position(int closed_position);

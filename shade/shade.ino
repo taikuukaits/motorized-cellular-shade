@@ -5,6 +5,8 @@
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
 #include "motor_driver.h"
+#include "permanent_storage.h"
+#include "shade_positioner.h"
 #include "secrets.h"
 #include "device.h"
 #include "config.h"
@@ -26,13 +28,13 @@ enum SHADE_MODE {
 
 SHADE_MODE current_mode = IS_IDLING;
 
-MotorDriver* motor_driver = new MotorDriver(MOTOR_PIN_ONE, MOTOR_PIN_TWO, ENCODER_PIN_ONE, ENCODER_PIN_TWO);
+Encoder encoder = Encoder(ENCODER_PIN_ONE, ENCODER_PIN_TWO);
+PermanentStorage permanent_storage = PermanentStorage();
+MotorDriver motor_driver = MotorDriver(MOTOR_PIN_ONE, MOTOR_PIN_TWO, encoder);
+ShadePositioner shade_positioner = ShadePositioner(motor_driver, permanent_storage);
 
 void setup() {
   Serial.begin(9600);
-
-  motor_driver->begin();
-  right_motor->begin();
 
   delay(1000);
   Serial.println("----------------------------------------------");
@@ -42,24 +44,19 @@ void setup() {
   Serial.println("----------------------------------------------");
   delay(1000);
 
-  Serial.println("Setting up EEPROM.");
+  Serial.println("Setting up device.");
 
-  storageSetup();
+  permanent_storage.begin();
+  motor_driver.begin();
+  shade_positioner.begin();
 
-  Serial.println("Reading saved data in EEPROM.");
+  Serial.println("State of the device.");
 
-  current_position = storageReadPosition();
-  max_steps = storageReadMaxSteps();
-
-  Serial.print("Position: ");
-  Serial.println(current_position);
-  Serial.print("Max Steps: ");
-  Serial.println(max_steps);
+  Serial.print("Last Shade Position: ");
+  Serial.println(permanent_storage.read_last_known_shade_position());
+  Serial.print("Closed Position: ");
+  Serial.println(permanent_storage.read_closed_position());
   Serial.println("----------------------------------------------");
-  if (max_steps == 0) {
-    Serial.println("URGENT: This shade has not been calibrated.");
-    Serial.println("----------------------------------------------");
-  }
 
   client.setBufferSize(MQTT_PACKET_SIZE);
 
@@ -75,11 +72,9 @@ void setup() {
 
   //Calibration
   client.subscribe(GREETINGS_TOPIC);
-  client.subscribe(CALIBRATE_MAX_STEPS_TOPIC);
+  client.subscribe(CALIBRATE_CLOSED_POSITION_TOPIC);
   client.subscribe(CALIBRATE_POSITION_TOPIC);
   client.subscribe(CALIBRATE_JOG_TOPIC);
-  client.subscribe(CALIBRATE_RIGHT_JOG_TOPIC);
-  client.subscribe(CALIBRATE_LEFT_JOG_TOPIC);
 
   client.setCallback(callback);
 
@@ -89,9 +84,9 @@ void setup() {
 }
 
 void loop() {
-  left_motor->loop();
-  right_motor->loop();
-  if (!started) return;
+  motor_driver.loop();
+  shade_positioner.loop();
+  if (!started) return; // hmm should OTA go before this?
 
   ArduinoOTA.handle();
   if (current_mode == IS_UPDATING) {
@@ -99,7 +94,7 @@ void loop() {
   }
 
   if (current_mode == IS_OPENING || current_mode == IS_CLOSING || current_mode == IS_JOGGING) {
-    if (!left_motor->is_moving() && !right_motor->is_moving()) {
+    if (shade_positioner.is_moving()) {
       Serial.println("Done moving.");
 
       if (current_mode == IS_OPENING) {
@@ -137,16 +132,16 @@ void callback(char* topic_raw, byte* payload, unsigned int length) {
       Serial.print("OPENING");
       current_mode = IS_OPENING;
       client.publish(COVER_STATE_TOPIC, "opening");
-      move_both_motors_by(0 - current_position);
+      shade_positioner.move_to_shade_position(0);
     } else if (!strncmp((char *)payload, "CLOSE", length)) {
       Serial.print("CLOSING");
       current_mode = IS_CLOSING;
       client.publish(COVER_STATE_TOPIC, "closing");
-      move_both_motors_by(max_steps - current_position);
+      shade_positioner.move_to_close_position();
     } else if (!strncmp((char *)payload, "STOP", length)) {
       Serial.print("STOPPING");
       //Theoretically, here we need to guarantee motors are in known position.
-
+      shade_positioner.request_stop();
     } else {
       Serial.print("UNKNOWN command.");
     }
@@ -160,68 +155,38 @@ void callback(char* topic_raw, byte* payload, unsigned int length) {
       Serial.println("Sent hello!");
       client.publish(GREETINGS_TOPIC, DEVICE_ID);
     }
-  } else if (topic == CALIBRATE_LEFT_JOG_TOPIC) {
-    int steps = payload_to_int(payload, length);
-    move_motor_by(left_motor, "left", steps);
-    current_mode = IS_JOGGING;
-    Serial.print("Jogging ");
-    Serial.print(steps);
-    Serial.print(" steps on left motor.");
-
-  } else if (topic == CALIBRATE_RIGHT_JOG_TOPIC) {
-    int steps = payload_to_int(payload, length);
-    move_motor_by(right_motor, "right", steps);
-    current_mode = IS_JOGGING;
-    Serial.print("Jogging ");
-    Serial.print(steps);
-    Serial.print(" steps on right motor.");
 
   }  else if (topic == CALIBRATE_JOG_TOPIC) {
-    int steps = payload_to_int(payload, length);
-    move_both_motors_by(steps);
+    int jog_amount = payload_to_int(payload, length);
+    shade_positioner.move_to_shade_position(shade_positioner.get_shade_position() + jog_amount);
     current_mode = IS_JOGGING;
     Serial.print("Jogging ");
-    Serial.print(steps);
-    Serial.print(" steps on both motors.");
+    Serial.print(jog_amount);
+    Serial.print(" shade position.");
 
-  } else if (topic == CALIBRATE_MAX_STEPS_TOPIC) {
-    int steps = payload_to_int(payload, length);
-    Serial.print("Updating max steps to ");
-    Serial.println(steps);
-    storageSaveMaxSteps(steps);
-    Serial.println("Restarting...");
-    ESP.restart();
+  } else if (topic == CALIBRATE_CLOSED_POSITION_TOPIC) {
+    int position = payload_to_int(payload, length);
+    Serial.print("Updating close position to ");
+    Serial.println(position);
+    shade_positioner.calibration_set_shade_closed_position(position);
+    restart();
+
   } else if (topic == CALIBRATE_POSITION_TOPIC) {
-    int steps = payload_to_int(payload, length);
-    Serial.print("Updating position to ");
-    Serial.println(steps);
-    storageSavePosition(steps);
-    Serial.println("Restarting...");
-    ESP.restart();
+    int position = payload_to_int(payload, length);
+    Serial.print("Updating current shade position to ");
+    Serial.println(position);
+    shade_positioner.calibration_shade_is_currently_at(position);
+    restart();
   }
 }
 
-void move_both_motors_by(int steps) {
-  move_motor_by(left_motor, "left", steps);
-  move_motor_by(right_motor, "right", steps);
+void restart() {
+    Serial.println("Restarting...");
+    ESP.restart();
 }
 
 int payload_to_int(byte* payload, unsigned int length) {
   payload[length] = '\0';
   String s = String((char*)payload);
   return s.toInt();
-}
-
-void move_motor_by(MotorDriver* motor, char* motor_name, int steps) {
-  Serial.print("Moving ");
-  Serial.print(motor_name);
-  Serial.print(" motor by ");
-  Serial.print(steps);
-  if (steps > 0) {
-    Serial.println(" forward.");
-    motor->move_forward_steps(steps);
-  } else {
-    Serial.println(" backward.");
-    motor->move_backward_steps(abs(steps));
-  }
 }

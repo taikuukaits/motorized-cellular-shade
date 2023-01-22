@@ -9,13 +9,13 @@ MotorDriver::MotorDriver(int motor_pin_one, int motor_pin_two, Encoder encoder){
   _encoder = encoder;
 }
 
-void MotorDriver::setup() {
+void MotorDriver::begin() {
     pinMode(_motor_pin_one, OUTPUT);
     pinMode(_motor_pin_two, OUTPUT);
     _halt();
 }
 
-void MotorDriver::request_move() {
+bool MotorDriver::request_move() {
     if (_moving) {
         return false; 
     }
@@ -34,18 +34,21 @@ void MotorDriver::request_move() {
     } else {
         _move_negative();
     }
+    return true;
 }
 
-void MotorDriver::request_stop() {
+bool MotorDriver::request_stop() {
   if (_moving) {
     _target = _current_position; // We consider wherever we are the current target - let actual stop happen naturally.
+    return true;
   }
+  return false;
 }
 
 void MotorDriver::loop() {
   int _next_position = encoder.read();
   if (_next_position != _current_position) {
-      _current_position = next_position;
+      _current_position = _next_position;
       _current_position_changed = true;
       _millis_when_position_last_changed = millis();
       _diagnostic_position_change();
@@ -61,7 +64,7 @@ void MotorDriver::loop() {
               _diagnostic_reached_target();
               _halt();
           }
-      } else if (_moving && reached_target && is_within_reached_target_delay()) {
+      } else if (_moving && _reached_target && is_within_reached_target_delay()) {
           // normal situation, this is totally fine, we just swallow this movement
           _diagnostic_position_change_detected_within_delay();
       } else {

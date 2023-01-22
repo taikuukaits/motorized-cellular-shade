@@ -3,11 +3,9 @@
 ShadePositioner::ShadePositioner(MotorDriver motor_driver, PermanentStorage storage) {
     _motor_driver = motor_driver;
     _storage = storage;
-
-    _motor_driver.set_position_changed_callback(this->_motor_position_changed)
 }
 
-void ShadePositioner::setup() {
+void ShadePositioner::begin() {
     _last_known_shade_position = _storage.read_last_known_shade_position();
     _closed_position = _storage.read_closed_position();
 }
@@ -21,7 +19,9 @@ void ShadePositioner::loop() {
         _storage.write_last_known_shade_position(_last_known_shade_position);
     }
 }
-
+void ShadePositioner::request_stop() {
+    _motor_driver.request_stop();
+}
 void ShadePositioner::is_open() {
     return !motor_driver.is_moving() && _last_known_shade_position < 0;
 }
@@ -36,6 +36,10 @@ void ShadePositioner::is_stopped() {
 
 void ShadePositioner::get_shade_position() {
     return _last_known_shade_position;
+}
+
+void ShadePositioner::move_to_close_position(int target) {
+    move_to_shade_position(_closed_position);
 }
 
 void ShadePositioner::move_to_shade_position(int target) {

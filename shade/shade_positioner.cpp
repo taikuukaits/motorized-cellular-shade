@@ -8,13 +8,17 @@ ShadePositioner::ShadePositioner(MotorDriver motor_driver, PermanentStorage stor
 }
 
 void ShadePositioner::setup() {
-
+    _last_known_shade_position = _storage.read_last_known_shade_position();
+    _closed_position = _storage.read_closed_position();
 }
 
 void ShadePositioner::loop() {
     int current_motor_position = _motor_driver.get_last_known_rest_position();
     if (current_motor_position != _last_known_motor_position) {
-        
+        int delta = _last_known_motor_position - current_motor_position;
+        _last_known_shade_position = _last_known_shade_position + delta;
+        _last_known_motor_position = current_motor_position;
+        _storage.write_last_known_shade_position(_last_known_shade_position);
     }
 }
 
@@ -50,13 +54,11 @@ void ShadePositioner::move_to_shade_position(int target) {
 }
 
 void ShadePositioner::calibration_shade_is_currently_at(int shade_position) {
-
+    _last_known_shade_position = shade_position;
+    _storage.write_last_known_shade_position(_last_known_shade_position);
 }
 
 void ShadePositioner::calibration_set_shade_closed_position(int closed_position) {
-
-}
-
-void ShadePositioner::_motor_position_changed() {
-
+    _closed_position = closed_position;
+    _storage.write_closed_position(_closed_position);
 }

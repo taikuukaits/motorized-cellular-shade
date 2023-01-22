@@ -26,7 +26,7 @@ class ShadePositioner
 
         MotorDriver _motor_driver;
         PermanentStorage _storage;        
-};
+}
 
 // shade starts up - motor is at position 0
 // positioner reads shade position 200 from storage

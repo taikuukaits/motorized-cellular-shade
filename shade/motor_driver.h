@@ -1,3 +1,6 @@
+#ifndef MotorDriver_H
+#define MotorDriver_H
+
 #include <Encoder.h>
 
 class MotorDriver 
@@ -44,5 +47,7 @@ class MotorDriver
 
         int _motor_pin_one;
         int _motor_pin_two;
-        Encoder encoder;
+        Encoder _encoder;
 };
+
+#endif

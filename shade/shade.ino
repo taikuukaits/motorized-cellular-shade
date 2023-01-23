@@ -1,15 +1,19 @@
+#include <PubSubClient.h>
+
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include "Arduino.h"
+
 #include "motor_driver.h"
 #include "permanent_storage.h"
 #include "shade_positioner.h"
 #include "secrets.h"
 #include "device.h"
 #include "config.h"
+#include <Encoder.h>
 
 WiFiClient espClient;
 PubSubClient client(espClient);

@@ -1,8 +1,6 @@
 #include "shade_positioner.h"
 
-ShadePositioner::ShadePositioner(MotorDriver motor_driver, PermanentStorage storage) {
-    _motor_driver = motor_driver;
-    _storage = storage;
+ShadePositioner::ShadePositioner(MotorDriver motor_driver, PermanentStorage storage) : _motor_driver(motor_driver), _storage(storage) {
 }
 
 void ShadePositioner::begin() {
@@ -22,29 +20,34 @@ void ShadePositioner::loop() {
 void ShadePositioner::request_stop() {
     _motor_driver.request_stop();
 }
-void ShadePositioner::is_open() {
-    return !motor_driver.is_moving() && _last_known_shade_position < 0;
+
+bool ShadePositioner::is_moving() {
+    return _motor_driver.is_moving();
 }
 
-void ShadePositioner::is_closed() {
-    return !motor_driver.is_moving() && _last_known_shade_position > _closed_position;
+bool ShadePositioner::is_open() {
+    return !_motor_driver.is_moving() && _last_known_shade_position < 0;
 }
 
-void ShadePositioner::is_stopped() {
-    return !motor_driver.is_moving() && !is_open() && !is_closed();
+bool ShadePositioner::is_closed() {
+    return !_motor_driver.is_moving() && _last_known_shade_position > _closed_position;
 }
 
-void ShadePositioner::get_shade_position() {
+bool ShadePositioner::is_stopped() {
+    return !_motor_driver.is_moving() && !is_open() && !is_closed();
+}
+
+int ShadePositioner::get_shade_position() {
     return _last_known_shade_position;
 }
 
-void ShadePositioner::move_to_close_position(int target) {
+void ShadePositioner::move_to_close_position() {
     move_to_shade_position(_closed_position);
 }
 
 void ShadePositioner::move_to_shade_position(int target) {
     if (_motor_driver.is_moving()) {
-        Serial.println("Can't move! Already moving.")
+        Serial.println("Can't move! Already moving.");
         return;
     }
 

@@ -1,3 +1,6 @@
+#ifndef PermanentStorage_H
+#define PermanentStorage_H
+
 #include <EEPROM_Rotate.h>
 
 class PermanentStorage 
@@ -16,8 +19,10 @@ class PermanentStorage
         void write_closed_position(int to_write);
 
     private:
-        int _eeprom_read_int();
+        int _eeprom_read_int(int index);
         void _eeprom_write_int(int index, int value);
 
         EEPROM_Rotate _eepromr;
-}
+};
+
+#endif

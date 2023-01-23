@@ -7,7 +7,7 @@
 #define EEPROM_SECTORS 4
 #define EEPROM_SPACE 4096
 
-void PermanentStorage::PermanentStorage() {
+PermanentStorage::PermanentStorage() {
 
 }
 

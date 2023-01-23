@@ -1,12 +1,9 @@
 #include "motor_driver.h"
-#include "Arduino.h"
-#include <Encoder.h>
 
 // Responsible for moving the motor to positions is relative to setup (is always 0 after setup).
-MotorDriver::MotorDriver(int motor_pin_one, int motor_pin_two, Encoder encoder){
+MotorDriver::MotorDriver(int motor_pin_one, int motor_pin_two, Encoder encoder) : _encoder(encoder) {
   _motor_pin_one = motor_pin_one;
   _motor_pin_two = motor_pin_two;
-  _encoder = encoder;
 }
 
 void MotorDriver::begin() {
@@ -15,15 +12,15 @@ void MotorDriver::begin() {
     _halt();
 }
 
-bool MotorDriver::request_move() {
+bool MotorDriver::request_move(int new_target) {
     if (_moving) {
         return false; 
     }
     _moving = true;
     _reached_target = false;
-    _target = _new_target;
+    _target_position = new_target;
 
-    if (_new_target > _position) {
+    if (new_target > _target_position) {
         _direction_positive = true; 
     } else {
         _direction_positive = false;
@@ -39,14 +36,14 @@ bool MotorDriver::request_move() {
 
 bool MotorDriver::request_stop() {
   if (_moving) {
-    _target = _current_position; // We consider wherever we are the current target - let actual stop happen naturally.
+    _target_position = _current_position; // We consider wherever we are the current target - let actual stop happen naturally.
     return true;
   }
   return false;
 }
 
 void MotorDriver::loop() {
-  int _next_position = encoder.read();
+  int _next_position = _encoder.read();
   if (_next_position != _current_position) {
       _current_position = _next_position;
       _current_position_changed = true;
@@ -64,7 +61,7 @@ void MotorDriver::loop() {
               _diagnostic_reached_target();
               _halt();
           }
-      } else if (_moving && _reached_target && is_within_reached_target_delay()) {
+      } else if (_moving && _reached_target && _is_within_reached_target_delay()) {
           // normal situation, this is totally fine, we just swallow this movement
           _diagnostic_position_change_detected_within_delay();
       } else {
@@ -104,11 +101,11 @@ int MotorDriver::get_current_position() {
 
 bool MotorDriver::_has_reached_target() {
     if (_direction_positive) {
-        if (_current_position > _target) {
+        if (_current_position > _target_position) {
             return true;
         }
     } else {
-        if (_current_position < _target) {
+        if (_current_position < _target_position) {
             return true;
         }
     }
@@ -130,12 +127,12 @@ void MotorDriver::_halt() {
   digitalWrite(_motor_pin_two, LOW);
 }
 
-void MotorDriver::_has_stall_delay_been_exceeded() {
-    return (unsigned long)(millis() - millis_when_position_last_changed) > position_change_stall_delay;
+bool MotorDriver::_has_stall_delay_been_exceeded() {
+    return (unsigned long)(millis() - _millis_when_position_last_changed) > _position_change_stall_delay;
 }
 
-void MotorDriver::_is_within_reached_target_delay() {
-    return (unsigned long)(millis() - millis_when_reached_target) > reached_target_delay;
+bool MotorDriver::_is_within_reached_target_delay() {
+    return (unsigned long)(millis() - _millis_when_reached_target) > _reached_target_delay;
 }
 
 void MotorDriver::_diagnostic_position_change_without_movement() {

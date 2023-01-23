@@ -9,9 +9,10 @@ class ShadePositioner
         void begin();
         void loop();
 
-        void is_open();
-        void is_closed();
+        bool is_open();
+        bool is_closed();
         bool is_stopped();
+        bool is_moving();
 
         int get_shade_position();
         void move_to_shade_position(int target); 
@@ -29,7 +30,7 @@ class ShadePositioner
 
         MotorDriver _motor_driver;
         PermanentStorage _storage;        
-}
+};
 
 // shade starts up - motor is at position 0
 // positioner reads shade position 200 from storage

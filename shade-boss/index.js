@@ -102,38 +102,34 @@ function pick_calibration_option(shade){
         type: 'list',
         name: 'calibration',
         message: 'What would you like to do with ' + shade + '?',
-        choices: ['Set Max Steps', 'Set Position', 'Jog', 'Jog Left', 'Jog Right'],
+        choices: ['Set Closed Position', 'Set Current Position', 'Jog'],
         },
     ])
     .then(answers => {
         console.info('Answer:', answers.calibration);
-        if (answers.calibration == 'Set Max Steps') {
-            set_max_steps(shade);
-        } else if (answers.calibration == 'Set Position') {
+        if (answers.calibration == 'Set Closed Position') {
+            set_closed_position(shade);
+        } else if (answers.calibration == 'Set Current Position') {
             set_position(shade);
         } else if (answers.calibration == "Jog") {
             jog_by(shade, "jog");
-        } else if (answers.calibration == "Jog Left") {
-            jog_by(shade, "left-jog");
-        } else if (answers.calibration == "Jog Right") {
-            jog_by(shade, "right-jog");
         }
     });
 }
 
 
-function set_max_steps(shade) {
+function set_closed_position(shade) {
     inquirer
     .prompt([
         {
         type: 'integer',
-        name: 'max_steps',
+        name: 'closed_position',
         message: 'What is the max steps you would like to set?'
         },
     ])
     .then(answers => {
-        console.info('Answer:', answers.max_steps);
-        client.publish(shade + "/calibrate/max-steps", answers.max_steps);
+        console.info('Answer:', answers.closed_position);
+        client.publish(shade + "/calibrate/closed", answers.closed_position);
         pick_calibration_option(shade);
     });
 
@@ -156,7 +152,7 @@ function set_position(shade) {
 
 }
 
-function jog_by(shade, topic) {
+function jog_by(shade) {
     inquirer
     .prompt([
         {
@@ -167,7 +163,7 @@ function jog_by(shade, topic) {
     ])
     .then(answers => {
         console.info('Answer:', answers.position);
-        client.publish(shade + "/calibrate/" + topic, answers.amount);
+        client.publish(shade + "/calibrate/jog", answers.amount);
         pick_calibration_option(shade);
     });
 

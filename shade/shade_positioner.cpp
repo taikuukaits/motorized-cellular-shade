@@ -41,6 +41,11 @@ int ShadePositioner::get_shade_position() {
     return _last_known_shade_position;
 }
 
+int ShadePositioner::get_closed_position()() {
+    return _closed_position;
+}
+
+
 void ShadePositioner::move_to_close_position() {
     move_to_shade_position(_closed_position);
 }

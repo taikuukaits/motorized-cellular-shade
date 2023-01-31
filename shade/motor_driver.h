@@ -38,9 +38,9 @@ class MotorDriver
 
         bool _reached_target = false;
         unsigned long _millis_when_reached_target = 0;
-        int _reached_target_delay = 50; // how long to wait after reaching the target to be done moving
+        int _reached_target_delay = 500; // how long to allow position changes after reaching the delay before assuming something went wrong - ie hit position at 300, position change detected at 350, delay of 100 says thats ok, a delay of 25 says panic
         unsigned long _millis_when_position_last_changed = 0;
-        int _position_change_stall_delay = 50; // how long to wait before assuming motor has stalled
+        int _position_change_stall_delay = 200; // how long to wait before assuming motor has stalled
 
         bool _current_position_changed = false;
         int _last_known_rest_position = 0;

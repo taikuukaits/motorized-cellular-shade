@@ -15,6 +15,8 @@ class ShadePositioner
         bool is_moving();
 
         int get_shade_position();
+        int get_closed_position();
+        
         void move_to_shade_position(int target); 
         void move_to_close_position();
         void request_stop();

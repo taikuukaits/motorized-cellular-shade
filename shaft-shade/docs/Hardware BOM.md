@@ -1,10 +1,12 @@
 - Electronics Stack
 	- Bottom
 		- Heat Inserts
-			- (4x) M3 insert - 4.5mm O.D - 3mm long
-			- (2x) M2.5 insert - 3.5mm O.D. - 4mm long
+			- Board to the Stack
+				- (4x) M2.5 insert - 3.5mm O.D - 3mm long
+			- Middle Stack to Bottom Stack
+				- (2x) M2.5 insert - 3.5mm O.D. - 4mm long
 		- To Attach the Board
-			- (4x) M3 bolt - 'socket' head - 5mm long
+			- (4x) M2.5 bolt - 'socket' head - 4mm long
 	- Middle
 		- To Attach to Bottom board
 			- (2x) M2.5 bolts - 'socket' head - 5mm long

@@ -3,7 +3,7 @@ Motorized cellular shades using ESPHome and cellular shade blinds from SelectBli
 
 These blinds were among the cheapest (yet still nice) I could find for my blinds. They still ran me $87 per window for 16 1/4" W x 61" H shades. 
 
-This project uses the Endstop Cover of ESPHome to achieve its goals: https://esphome.io/components/cover/endstop/
+This project uses the [Endstop Cover](https://esphome.io/components/cover/endstop/) of ESPHome.
 
 # Getting Started
 
@@ -21,15 +21,17 @@ You will need to adopt the device into Home Assistant yourself.
 
 # Electronics
 
-We need the following wired up for ESP Home to work:
+The ESPHome code assumes the following wiring:
 ```
-D1 to (white) B 1A L9110
-D2 to (purple) B 2A L9110
+D1 to B-1A L9110
+D2 to B-2A L9110
 D6 to End Stop 1
 D5 to End Stop 2
+Both End Stops connect to GND.
 ```
+NOTE: It's recommended that D6 represent UP or CLOSED or you will need to modify the YAML file.
 
-The following is required for power: 
+This is recommended for power: 
 ```
 5V on D1 mini to Buck Converter Out +
 G on D1 mini to Buck Converter Out -
@@ -39,40 +41,77 @@ Buck Converter In + to 12V Source
 Buck Converter In - to 12V Source
 ```
 
-# Sensors in ESPHome
+# ESPHome
+
+The complete YAML file is checked into source under examples, for a short explanation continue reading. This YAML was written with the help of AI.
+
 Each of the two endstops are binary sensors in ESPHome
 ```
 binary_sensor:
   - platform: gpio
-    device_class: opening
-    pin: D6
-    id: end_stop_open
-    name: End Stop Open
-    mode: INPUT_PULLUP
-    inverted: true
-binary_sensor:
-  - platform: gpio
-    device_class: opening
-    pin: D5
-    id: end_stop_closed
-    name: End Stop Closed
-    mode: INPUT_PULLUP
-    inverted: true
-```
+    id: endstop_open
+    name: "Endstop Open"
+    pin:
+      number: D6
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on: 20ms
+      - delayed_off: 20ms
 
-And our motor is going to be a binary output
-```
-output:
   - platform: gpio
+    id: endstop_closed
+    name: "Endstop Closed"
+    pin:
+      number: D5
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on: 20ms
+      - delayed_off: 20ms
+```
+They are INPUT_PULLUP because we connect them to GND. They are inverted because when pressed they are shorted to GND (LOW when PRESSED)
+
+The motor is driven by two switches:
+```
+switch:
+  - platform: gpio
+    id: motor_in1
     pin: D1
-    id: motor_1
+    restore_mode: ALWAYS_OFF
+
   - platform: gpio
+    id: motor_in2
     pin: D2
-    id: motor_2
+    restore_mode: ALWAYS_OFF
+```
+These follow the [drivers table](https://docs.sunfounder.com/projects/3in1-kit-v2/en/latest/components/component_l9110_module.html) to control them, so HIGH on B1 and LOW on B2 sends the B motor in one direction and LOW on B1 and HIGH on B2 sends it in the other direction. LOW on both is stop.
+
+
+The scripts control the motor, setting these pins as appropriate for the desired action. When we want the motor to open, one is high and the other low.
+```
+script:
+  - id: motor_stop
+    then:
+      - switch.turn_off: motor_in1
+      - switch.turn_off: motor_in2
+
+  # OPEN direction
+  - id: motor_open
+    then:
+      - script.execute: motor_stop
+      - switch.turn_on: motor_in1
+      - switch.turn_off: motor_in2
+
+  # CLOSE direction
+  - id: motor_close
+    then:
+      - script.execute: motor_stop
+      - switch.turn_off: motor_in1
+      - switch.turn_on: motor_in2
 ```
 
-And finally we have the cover itself, this will control the motor pins based on the endstops. 
-
+Finally, we leverage the end stop cover from ESPHome. This cover uses time to approximate how open or closed the shade is. And it invokes our script actions to control the motor and uses our endstops for sensing closing and open. 
 ```
 cover:
   - platform: endstop
@@ -93,210 +132,3 @@ cover:
       - switch.turn_off: open_cover_switch
       - switch.turn_off: close_cover_switch
 ```
-The main idea here is HIGH on D1 and LOW on D2 will spin the motor one way, and LOW on D1 and HIGH on D2 will spin it the other way. LOW on both will stop the motor: https://docs.sunfounder.com/projects/3in1-kit-v2/en/latest/components/component_l9110_module.html
-Note: I'm not sure what the difference is between brake and stop. 
-
-The full yaml file is available in the repo.
-
-```
-substitutions:
-  open_endstop_inverted: "true"
-  closed_endstop_inverted: "true"
-  failsafe_run_time: "30s"
-
-switch:
-  - platform: gpio
-    id: motor_in1
-    pin: D1
-    restore_mode: ALWAYS_OFF
-
-  - platform: gpio
-    id: motor_in2
-    pin: D2
-    restore_mode: ALWAYS_OFF
-
-binary_sensor:
-  - platform: gpio
-    id: endstop_open_raw
-    name: "Endstop Open (raw)"
-    pin:
-      number: D6
-      mode: INPUT_PULLUP
-      inverted: ${open_endstop_inverted}
-    filters:
-      - delayed_on: 20ms
-      - delayed_off: 20ms
-
-  - platform: gpio
-    id: endstop_closed_raw
-    name: "Endstop Closed (raw)"
-    pin:
-      number: D5
-      mode: INPUT_PULLUP
-      inverted: ${closed_endstop_inverted}
-    filters:
-      - delayed_on: 20ms
-      - delayed_off: 20ms
-
-  - platform: template
-    id: endstop_open
-    name: "Endstop Open"
-    lambda: |-
-      return id(endstop_open_raw).state;
-    on_press:
-      then:
-        - script.execute: motor_stop
-        - cover.template.publish:
-            id: my_cover
-            state: OPEN
-
-  - platform: template
-    id: endstop_closed
-    name: "Endstop Closed"
-    lambda: |-
-      return id(endstop_closed_raw).state;
-    on_press:
-      then:
-        - script.execute: motor_stop
-        - cover.template.publish:
-            id: my_cover
-            state: CLOSED
-globals:
-  - id: moving_dir   # -1 = closing, 0 = stopped, +1 = opening
-    type: int
-    restore_value: no
-    initial_value: "0"
-
-script:
-  - id: motor_stop
-    mode: restart
-    then:
-      - switch.turn_off: motor_in1
-      - switch.turn_off: motor_in2
-      - lambda: |-
-          id(moving_dir) = 0;
-  - id: motor_open
-    mode: restart
-    then:
-      # never drive open if already at endstop
-      - if:
-          condition:
-            binary_sensor.is_on: endstop_open
-          then:
-            - script.execute: motor_stop
-            - cover.template.publish:
-                id: my_cover
-                state: OPEN
-          else:
-            - script.execute: motor_stop
-            - switch.turn_on: motor_in1
-            - switch.turn_off: motor_in2
-            - lambda: |-
-                id(moving_dir) = 1;
-  - id: motor_close
-    mode: restart
-    then:
-      # never drive closed if already at endstop
-      - if:
-          condition:
-            binary_sensor.is_on: endstop_closed
-          then:
-            - script.execute: motor_stop
-            - cover.template.publish:
-                id: my_cover
-                state: CLOSED
-          else:
-            - script.execute: motor_stop
-            - switch.turn_off: motor_in1
-            - switch.turn_on: motor_in2
-            - lambda: |-
-                id(moving_dir) = -1;
-cover:
-  - platform: template
-    id: my_cover
-    name: "Endstop Cover"
-    device_class: garage
-    optimistic: false
-
-    open_action:
-      - if:
-          condition:
-            binary_sensor.is_on: endstop_open
-          then:
-            - cover.template.publish:
-                id: my_cover
-                state: OPEN
-          else:
-            - cover.template.publish:
-                id: my_cover
-                state: OPENING
-            - script.execute: motor_open
-            # Failsafe stop: prevents endless run if an endstop fails
-            - delay: ${failsafe_run_time}
-            - if:
-                condition:
-                  lambda: 'return id(moving_dir) == 1;'
-                then:
-                  - script.execute: motor_stop
-                  - cover.template.publish:
-                      id: my_cover
-                      state: STOPPED
-
-    close_action:
-      - if:
-          condition:
-            binary_sensor.is_on: endstop_closed
-          then:
-            - cover.template.publish:
-                id: my_cover
-                state: CLOSED
-          else:
-            - cover.template.publish:
-                id: my_cover
-                state: CLOSING
-            - script.execute: motor_close
-            - delay: ${failsafe_run_time}
-            - if:
-                condition:
-                  lambda: 'return id(moving_dir) == -1;'
-                then:
-                  - script.execute: motor_stop
-                  - cover.template.publish:
-                      id: my_cover
-                      state: STOPPED
-
-    stop_action:
-      - script.execute: motor_stop
-      - cover.template.publish:
-          id: my_cover
-          state: STOPPED
-
-# Restore state on boot.
-on_boot:
-  priority: -10
-  then:
-    - script.execute: motor_stop
-    - if:
-        condition:
-          binary_sensor.is_on: endstop_open
-        then:
-          - cover.template.publish:
-              id: my_cover
-              state: OPEN
-        else:
-          - if:
-              condition:
-                binary_sensor.is_on: endstop_closed
-              then:
-                - cover.template.publish:
-                    id: my_cover
-                    state: CLOSED
-              else:
-                - cover.template.publish:
-                    id: my_cover
-                    state: STOPPED
-
-```
-
-
-

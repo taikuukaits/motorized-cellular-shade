@@ -1,0 +1,122 @@
+esphome:
+  name: shade
+  friendly_name: Shade
+
+esp8266:
+  board: d1_mini
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "<REDACTED>"
+
+ota:
+  - platform: esphome
+    password: "<REDACTED>"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Shade Fallback Hotspot"
+    password: "<REDACTED>"
+
+captive_portal:
+
+substitutions:
+  open_duration: 60s
+  close_duration: 60s
+  failsafe_duration: 120s
+
+# ----------------------------
+# Motor pins (L9110)
+# ----------------------------
+switch:
+  - platform: gpio
+    id: motor_in1
+    pin: D1
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: motor_in2
+    pin: D2
+    restore_mode: ALWAYS_OFF
+
+# ----------------------------
+# Motor control scripts
+# ----------------------------
+script:
+  - id: motor_stop
+    then:
+      - switch.turn_off: motor_in1
+      - switch.turn_off: motor_in2
+
+  # OPEN direction
+  - id: motor_open
+    then:
+      - script.execute: motor_stop
+      - switch.turn_on: motor_in1
+      - switch.turn_off: motor_in2
+
+  # CLOSE direction
+  - id: motor_close
+    then:
+      - script.execute: motor_stop
+      - switch.turn_off: motor_in1
+      - switch.turn_on: motor_in2
+
+# ----------------------------
+# Endstops
+# ----------------------------
+binary_sensor:
+  - platform: gpio
+    id: endstop_open
+    name: "Endstop Open"
+    pin:
+      number: D6
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on: 20ms
+      - delayed_off: 20ms
+
+  - platform: gpio
+    id: endstop_closed
+    name: "Endstop Closed"
+    pin:
+      number: D5
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on: 20ms
+      - delayed_off: 20ms
+
+# ----------------------------
+# Endstop Cover (native)
+# ----------------------------
+cover:
+  - platform: endstop
+    id: my_cover
+    name: "Endstop Cover"
+    device_class: garage
+
+    open_action:
+      - script.execute: motor_open
+    open_endstop: endstop_open
+    open_duration: ${open_duration}
+
+    close_action:
+      - script.execute: motor_close
+    close_endstop: endstop_closed
+    close_duration: ${close_duration}
+
+    stop_action:
+      - script.execute: motor_stop
+
+    # Absolute safety timeout (both directions)
+    max_duration: ${failsafe_duration}

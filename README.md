@@ -1,7 +1,7 @@
 # motorized-cellular-shade
 Motorized cellular shades using ESPHome and cellular shade blinds from SelectBlinds.com
 
-These blinds were among the cheapest (yet still nice) I could find for my blinds. They still ran me $87 per window for 16 1/4" W x 61" H shades. 
+These blinds were among the cheapest (yet still nice) I could find for my blinds. They still ran me between $27 and $53 per shade.
 
 This project uses the [Endstop Cover](https://esphome.io/components/cover/endstop/) of ESPHome.
 

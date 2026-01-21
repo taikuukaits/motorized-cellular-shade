@@ -1,4 +1,4 @@
-I used the following. These are not affiliate links and I am not affiliated with Amazon or any seller of electronics in any way.
+I used the following. These are not affiliate links; I am not affiliated with Amazon, AliExpress or any seller in any way.
 
 | Component | Quantity | Unit Price | Link |
 |-----------|----------|-----------|------|

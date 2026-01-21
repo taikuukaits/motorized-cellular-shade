@@ -1,6 +1,4 @@
-I sourced my shades from selectblinds.com all of this variety: https://www.selectblinds.com/cellular-shades/light-filtering-cordless-cellular-shades.html?ColorId=9003
-
-I am not affiliated with selectblinds in any way. 
+I sourced my shades from selectblinds.com all of this variety: https://www.selectblinds.com/cellular-shades/light-filtering-cordless-cellular-shades.html?ColorId=9003. These are not affiliate links; I am not affiliated with selectblinds or any seller in any way.
 
 Shades purchased:
 - 2022: 27.81 each: 16 1/2" w x 30 1/4" h

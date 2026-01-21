@@ -1,6 +1,6 @@
 Overall BOM
 
-See notes for how these were calculated.
+See notes for how these were calculated. These are not affiliate links; I am not affiliated with Amazon, AliExpress or any seller in any way.
 
 | Component | Quantity | Unit Price | Link |
 |-----------|----------|-----------|------|

@@ -14,7 +14,7 @@ There are several steps needed to make your own shades.
 3. You will need to wire the electronic components
 4. You will need to mount the shade and provide power
 5. You will need to connect the shade to Home Assistant and ESPHome
-6. You will need to provide the shade a YAML configuration file
+6. You will need to provide the shade a YAML configuration file in `config`
 
 This guide will only cover hardwiring the shades to 12V DC. Battery or solar is not currently supported. 
 

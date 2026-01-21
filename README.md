@@ -9,10 +9,12 @@ This project uses the [Endstop Cover](https://esphome.io/components/cover/endsto
 
 There are several steps needed to make your own shades. 
 
-1. You will need to build the physical components inside the shade
-2. You will need to wire the electronic components
-3. You will need to upload the code to the electronics
-4. You will need to mount the shade and get the electronics power
+1. You will need to print the physical components from the `stl` directory
+2. You will need to assemble the physical components using hardware from the `bom`
+3. You will need to wire the electronic components
+4. You will need to mount the shade and provide power
+5. You will need to connect the shade to Home Assistant and ESPHome
+6. You will need to provide the shade a YAML configuration file
 
 This guide will only cover hardwiring the shades to 12V DC. Battery or solar is not currently supported. 
 

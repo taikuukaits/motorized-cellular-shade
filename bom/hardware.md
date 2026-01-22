@@ -15,6 +15,14 @@ See notes for how these were calculated. These are not affiliate links; I am not
 | Tr8x2 Lead Screw with Nut | 1 | 6.50 | [Amazon](https://www.amazon.com/dp/B08JLXKJKC)
 | MR148-2RS Ball Bearings 8mm ID 14mm OD | 3 | 0.6795 | [Amazon] https://www.amazon.com/dp/B082PS75YB
 
+
+
+| Component |
+| M2.5 Brass Heat Set Inserts | https://www.amazon.com/M2-5-Brass-Insert-Nuts-M2-5x3x3-5mm/dp/B0FKBH9M19 |
+
+Best I could find was prusa which says: https://www.prusa3d.com/product/heat-set-inserts-m2-5-standard-100-pcs/
+For an OD of 3.6 hole of 3.1 so 3.2 might actually be good. We would only need to reprint the Rope Holders and shafts. 
+
 Notes:
 I found hardware hard to break down. Some things like the inserts were ordered in bulk, I took the bulk final total and divided to get my unit cost number. Example 3.34 including shipping for 100 grub screws = 0.04 unit. 
 
@@ -24,31 +32,38 @@ You want a Tr8x2 because we want maximum rotations for minimum travel distance o
 
 Grub screw assortment: (12.99) https://www.amazon.com/dp/B073H68PJH
 
+Alternatives: 
+You can buy lead screws from other distributors but pay for shipping. For example I found bulkman3d for 1.99 a lead screw but really high ($80) shipping. At some point it would make sense. I needed around 13 so its close at 145.12 but Amazon was still cheaper at 120.93 for all. 
 
 Per Component
- - - End Stop Holders
+ - - End Stop Holders (Each)
+ -     - (2x) M2.5 insert - 3.5mm O.D - 3mm long
+ -     - (2x) M2.5 grub screw - 5mm long
+ -     - (2x) M2 12mm bolts
+ -     - (2x) M2 nuts
+
+ The inserts to the Shaft are all OD 3
+ (motor shaft coupler and rope holders)
+ The inserts to hold the boxes in place are all 3.2
+
 
  - - Electronics Stack
  -     - Bottom
  -         - Heat Inserts
- -             - Board to the Stack
- -                 - (4x) M2.5 insert - 3.5mm O.D - 3mm long
- -             - Middle Stack to Bottom Stack
- -                 - (2x) M2.5 insert - 3.5mm O.D. - 4mm long
+ -             - (6x) M2.5 insert - 3.5mm O.D - 3mm long
  -         - To Attach the Board
- -             - (4x) M2.5 bolt - 'socket' head - 4mm long
+ -             - (4x) M2.5 bolt - 'socket' head - 6mm long
  -     - Middle
  -         - To Attach to Bottom board
- -             - (2x) M2.5 bolts - 'socket' head - 5mm long
+ -             - (2x) M2.5 bolts - 'socket' head - 6mm long
  -         - Heat Set Inserts
- -             - (2x) M2.5 insert - 3.5mm O.D. - 4mm long
+ -             - (4x) M2.5 insert - 3.5mm O.D - 3mm long
  -     - Top
  -         - To Attach to the Middle Board
- -             - (2x) M2.5 - countersunk head - 8mm long
- -             - (2x) M2.5 - 'socket' head - 5mm long
+ -             - (4x) M2.5 bolts - 'socket' head - 6mm long
+ - Totals: 10x Heat Set Inserts 2.5x3.5x3, 10x M2.5 Socket 6mm long
 
-^^^ Needs work, it should not be so many different pieces of hardware... I think we can reduct to just 
-M2.5 - 'socket' head 5mm and M2.5 insert - 3.5mm O.D - 3mm
+
 
 TODO: Make all hardware 2.5 with the same inserts and grub screws
 

@@ -1,4 +1,4 @@
-Power was trickier, these are things I considered useful. 
+Power was trickier, these are things I considered useful, nothing is really required, you just need a 12V source per shade.
 
 These are not affiliate links; I am not affiliated with Amazon, AliExpress or any seller in any way.
 

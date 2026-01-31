@@ -1,0 +1,1 @@
+Heat set insert tips (24.95): https://www.amazon.com/dp/B08B17VQLD

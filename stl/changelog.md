@@ -1,6 +1,10 @@
 - Jan 31 2026
 Added supports for doing the 3d inserts on round parts. Tried to make motor alignment easier. 
 
+Actually difficult here to get the ropes in alignment. Not sure why the first was so easy. 
+I think the key is to do the ropes BEFORE you solder the motor so you can easily move it. 
+
+
 
 - Jan 29 2026
 
